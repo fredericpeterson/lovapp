@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Perte de Poids · Full Body</title>
+<meta name="description" content="Programme Full Body + Cardio · 4 semaines · Basic-Fit">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#72243E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Perte de Poids">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png" type="image/png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --rose: #D4537E;
+    --rose-light: #FBEAF0;
+    --rose-mid: #F4C0D1;
+    --rose-dark: #72243E;
+    --teal: #1D9E75;
+    --teal-light: #E1F5EE;
+    --teal-dark: #085041;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --text: #1a1a2e;
+    --text-muted: #6b6b8a;
+    --surface: #ffffff;
+    --surface2: #f8f5f7;
+    --border: #e8dce4;
+  }
+
+  body { background: #fdf8fb; }
+
+  .ebook { font-family: 'DM Sans', sans-serif; max-width: 780px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+  /* COVER */
+  .cover {
+    background: linear-gradient(135deg, #F4C0D1 0%, #ED93B1 40%, #D4537E 100%);
+    border-radius: 16px;
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+  }
+  .cover-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.25);
+    color: #4B1528;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 1.2rem;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+  .cover h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .cover h1 em { font-style: italic; }
+  .cover-sub {
+    color: rgba(255,255,255,0.9);
+    font-size: 1rem;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+  }
+  .cover-pills { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .cover-pill {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 2rem 0 1rem;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--rose);
+  }
+  .section-header .icon {
+    width: 32px; height: 32px;
+    background: var(--rose-light);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .section-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--rose-dark);
+    font-weight: 700;
+  }
+
+  /* PLANNING */
+  .schedule-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 13px;
+  }
+  .schedule-row:last-child { border-bottom: none; }
+  .schedule-day-name { width: 90px; font-weight: 500; color: var(--text); flex-shrink: 0; }
+  .schedule-pill { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+  .pill-on { background: var(--rose-light); color: var(--rose-dark); }
+  .pill-off { background: var(--surface2); color: var(--text-muted); }
+  .schedule-detail { font-size: 12px; color: var(--text-muted); }
+
+  /* WARMUP */
+  .warmup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .warmup-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+  }
+  .warmup-title {
+    font-size: 13px; font-weight: 500;
+    color: var(--text);
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .warmup-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .warmup-list { list-style: none; }
+  .warmup-list li {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 3px 0;
+    padding-left: 14px;
+    position: relative;
+  }
+  .warmup-list li::before {
+    content: '→';
+    position: absolute; left: 0;
+    color: var(--rose-mid);
+    font-size: 11px;
+  }
+
+  /* WEEK TABS */
+  .week-nav { display: flex; gap: 6px; margin: 1rem 0 1.5rem; flex-wrap: wrap; }
+  .week-btn {
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 0.5px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .week-btn.active { background: var(--rose); color: #fff; border-color: var(--rose); }
+  .week-btn:hover:not(.active) { border-color: var(--rose); color: var(--rose-dark); }
+
+  .week-content { display: none; }
+  .week-content.active { display: block; }
+
+  .week-desc {
+    background: var(--rose-light);
+    border-left: 3px solid var(--rose);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    font-size: 13px;
+    color: #72243E;
+    margin-bottom: 1.2rem;
+  }
+
+  /* SEANCE CARDS */
+  .seance-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .seance-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .seance-header {
+    background: var(--rose);
+    padding: 10px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .seance-day { color: #fff; font-weight: 500; font-size: 13px; }
+  .seance-focus { background: rgba(255,255,255,0.2); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .seance-body { padding: 12px 14px; }
+
+  .exercise-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 7px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 12px;
+  }
+  .exercise-item:last-child { border-bottom: none; }
+  .ex-num {
+    width: 20px; height: 20px;
+    background: var(--rose-light);
+    color: var(--rose-dark);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 500;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .ex-name { font-weight: 500; color: var(--text); line-height: 1.3; }
+  .ex-sets { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+  .ex-muscle { color: var(--rose); font-size: 10px; margin-top: 1px; }
+
+  /* CARDIO BADGE */
+  .cardio-badge {
+    margin-top: 10px;
+    background: var(--teal-light);
+    border-radius: 8px;
+    padding: 7px 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .cardio-badge .dot { width: 8px; height: 8px; background: var(--teal); border-radius: 50%; flex-shrink: 0; }
+  .cardio-text { font-size: 11px; color: var(--teal-dark); font-weight: 500; }
+
+  /* FIGURE CARDS */
+  .figure-row { display: flex; gap: 12px; margin: 1.5rem 0; flex-wrap: wrap; }
+  .figure-card {
+    flex: 1; min-width: 90px;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .figure-card svg { display: block; margin: 0 auto 8px; }
+  .figure-label { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+  .figure-name { font-size: 12px; font-weight: 500; color: var(--text); margin-top: 2px; }
+
+  /* PROGRESS TABLE */
+  .prog-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .prog-table th {
+    background: var(--rose);
+    color: #fff;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 500;
+  }
+  .prog-table th:first-child { border-radius: 8px 0 0 0; }
+  .prog-table th:last-child { border-radius: 0 8px 0 0; }
+  .prog-table td {
+    padding: 8px 12px;
+    border-bottom: 0.5px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  .prog-table tr:last-child td { border-bottom: none; }
+  .prog-table tr:nth-child(even) td { background: var(--surface2); }
+  .prog-table-wrap { border: 0.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+
+  /* INJURY */
+  .injury-card {
+    background: var(--teal-light);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 10px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .injury-icon {
+    width: 28px; height: 28px;
+    background: #9FE1CB;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: var(--teal-dark);
+  }
+  .injury-title { font-size: 13px; font-weight: 500; color: var(--teal-dark); }
+  .injury-text { font-size: 12px; color: #0F6E56; line-height: 1.5; margin-top: 2px; }
+
+  /* NUTRITION */
+  .nutri-card {
+    background: var(--amber-light);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 12px 12px 0;
+    padding: 1rem 1.2rem;
+    margin-bottom: 10px;
+  }
+  .nutri-title { font-size: 13px; font-weight: 500; color: #412402; margin-bottom: 4px; }
+  .nutri-text { font-size: 12px; color: #633806; line-height: 1.6; }
+
+  /* TIPS */
+  .tips-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .tip-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+  }
+  .tip-emoji { font-size: 22px; margin-bottom: 6px; display: block; }
+  .tip-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .tip-text { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+  /* HIGHLIGHT BOX */
+  .highlight-box {
+    background: linear-gradient(135deg, #FBEAF0, #FDF3F7);
+    border: 1px solid var(--rose-mid);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.2rem;
+    font-size: 13px;
+    color: var(--rose-dark);
+    line-height: 1.7;
+  }
+  .highlight-box strong { color: var(--rose); }
+
+  /* REST TIMER */
+  .rest-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--rose-mid);
+    background: var(--rose-light);
+    color: var(--rose-dark);
+    font-size: 11px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .rest-btn:hover { background: var(--rose-mid); }
+  .rest-btn:active { transform: scale(0.96); }
+
+  .rest-timer-bar {
+    position: fixed;
+    left: 12px; right: 12px; bottom: 16px;
+    max-width: 756px;
+    margin: 0 auto;
+    background: var(--rose-dark);
+    border-radius: 16px;
+    padding: 14px 18px;
+    box-shadow: 0 10px 32px rgba(0,0,0,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(16px);
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 999;
+  }
+  .rest-timer-bar.visible { opacity: 1; pointer-events: all; transform: translateY(0); }
+  .rt-row1 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .rt-label { font-size: 12px; color: rgba(255,255,255,0.8); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 12px; }
+  .rt-cd { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 700; color: #fff; min-width: 54px; text-align: right; transition: color 0.3s; }
+  .rt-cd.ok { color: #9FE1CB; }
+  .rt-cd.urgent { color: #FBC0C0; }
+  .rt-row2 { display: flex; align-items: center; gap: 10px; }
+  .rt-track { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 99px; overflow: hidden; }
+  .rt-fill { height: 4px; border-radius: 99px; background: var(--teal); width: 0%; transition: width 1s linear, background 0.3s; }
+  .rt-fill.urgent { background: #FBC0C0; }
+  .rt-btn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    padding: 5px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .rt-btn:hover { background: rgba(255,255,255,0.22); }
+
+  /* APP NAV & PAGES */
+  body { padding-bottom: 78px; }
+  .app-nav {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: #fff; border-top: 1px solid var(--border);
+    display: flex; z-index: 900;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.05);
+  }
+  .app-nb {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 9px 4px 8px; background: none; border: none; color: #b5758f;
+    font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500;
+    cursor: pointer; transition: color 0.2s;
+  }
+  .app-nb .app-dot {
+    width: 26px; height: 26px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; background: var(--rose-light); color: #b5758f;
+    transition: background 0.2s, color 0.2s;
+  }
+  .app-nb.active { color: var(--rose-dark); }
+  .app-nb.active .app-dot { background: var(--rose); color: #fff; }
+
+  .app-page { display: none; }
+  .app-page.active { display: block; }
+  .app-ph { padding: 8px 0 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .app-psup { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--rose); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+  .app-saved { font-size: 10px; color: var(--teal); opacity: 0; transition: opacity 0.3s; font-weight: 500; }
+  .app-saved.show { opacity: 1; }
+  .app-ptitle { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--rose-dark); }
+  .app-srow { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+  .app-sc { background: var(--rose-light); border-radius: 12px; padding: 10px 12px; text-align: center; }
+  .app-sv { font-size: 18px; font-weight: 700; color: var(--rose-dark); }
+  .app-sl { font-size: 9.5px; color: #b5758f; margin-top: 2px; }
+  .app-pt { height: 4px; background: #f2d5de; border-radius: 99px; overflow: hidden; margin-bottom: 18px; }
+  .app-pf { height: 4px; border-radius: 99px; background: var(--teal); width: 0%; transition: width 0.4s; }
+  .app-ec { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+  .app-en { font-size: 15px; font-weight: 600; color: var(--rose-dark); margin-bottom: 2px; }
+  .app-em { font-size: 11.5px; color: #b5758f; margin-bottom: 8px; }
+  .app-etarget { font-size: 11px; color: var(--teal-dark); font-weight: 500; margin-bottom: 8px; }
+  .app-note { font-size: 11px; color: #b5758f; background: var(--rose-light); border-radius: 8px; padding: 6px 10px; margin-top: 4px; }
+  .app-rw { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 20px; }
+  .app-rd { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 12px; cursor: pointer; transition: border-color 0.15s; }
+  .app-rd:hover { border-color: var(--rose-mid); }
+  .app-rdl { font-size: 9.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #b5758f; margin-bottom: 4px; }
+  .app-rdn { font-size: 12.5px; font-weight: 600; color: var(--rose-dark); margin-bottom: 8px; line-height: 1.3; }
+  .app-rdm { font-size: 10px; color: #b5758f; margin-top: 8px; }
+  .app-rdp { height: 3px; background: #f2d5de; border-radius: 99px; margin-top: 8px; overflow: hidden; }
+  .app-rdpf { height: 3px; border-radius: 99px; background: var(--teal); transition: width 0.4s; }
+  .app-secl { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--rose-dark); margin: 20px 0 12px; }
+  .app-vr { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .app-vn { font-size: 12.5px; color: var(--rose-dark); min-width: 110px; }
+  .app-vtrack { flex: 1; height: 5px; background: #f2d5de; border-radius: 99px; overflow: hidden; }
+  .app-vbar { height: 5px; border-radius: 99px; background: var(--teal); transition: width 0.5s; }
+  .app-vs { font-size: 10.5px; color: #b5758f; min-width: 40px; text-align: right; }
+  .app-wknav { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .app-wkbtn { background: var(--rose-light); border: none; border-radius: 8px; color: var(--rose-dark); font-size: 15px; font-weight: 600; padding: 7px 16px; cursor: pointer; }
+  .app-wkbtn:hover { background: var(--rose-mid); }
+  .app-reset { width: 100%; background: none; border: 1px dashed var(--rose-mid); border-radius: 10px; color: #b5758f; font-size: 11px; padding: 9px; cursor: pointer; margin-top: 8px; text-align: center; transition: all 0.15s; }
+  .app-reset:hover { border-color: var(--rose); color: var(--rose-dark); }
+  .app-tb { background: var(--rose-light); border-radius: 12px; padding: 14px; margin-top: 6px; }
+  .app-tip { display: flex; gap: 9px; align-items: flex-start; margin-bottom: 9px; font-size: 11.5px; color: var(--rose-dark); line-height: 1.55; }
+  .app-tip:last-child { margin-bottom: 0; }
+  .app-tdot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); flex-shrink: 0; margin-top: 6px; }
+
+  /* SET TRACKER */
+  .set-tracker { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
+  .sb {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: 1.5px solid var(--rose-mid);
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: var(--rose-dark);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s, border-color 0.15s;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .sb:active { transform: scale(0.92); }
+  .sb.done { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .sb-wt {
+    width: 46px;
+    border: 1px solid #e5c7d0;
+    border-radius: 6px;
+    padding: 4px 4px;
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    text-align: center;
+    color: var(--rose-dark);
+    margin-right: 4px;
+  }
+  .sb-wt:focus { outline: none; border-color: var(--rose-dark); }
+  .sb-unit { font-size: 10px; color: #b5758f; margin-right: 10px; }
+
+  .card-progress { margin-top: 10px; }
+  .card-progress-track { height: 5px; background: #f2d5de; border-radius: 99px; overflow: hidden; }
+  .card-progress-fill { height: 5px; background: var(--teal); width: 0%; transition: width 0.3s; border-radius: 99px; }
+  .card-progress-label { font-size: 10.5px; color: #b5758f; margin-top: 4px; display: flex; justify-content: space-between; }
+  .reset-day-btn {
+    background: none; border: none; color: #b5758f; font-size: 10.5px;
+    text-decoration: underline; cursor: pointer; padding: 0;
+  }
+
+  @media (max-width: 560px) {
+    .seance-grid { grid-template-columns: 1fr; }
+    .warmup-grid { grid-template-columns: 1fr; }
+    .tips-grid { grid-template-columns: 1fr; }
+    .figure-row { flex-wrap: wrap; }
+    .cover h1 { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ebook">
+  <div id="app-pages">
+    <div class="app-page active" id="page0">
+      <div class="app-ph">
+        <div class="app-psup"><span id="sup0">Séance A</span><span class="app-saved" id="sv0">✓ sauvegardé</span></div>
+        <div class="app-ptitle"><strong id="title0">—</strong></div>
+      </div>
+      <div class="app-srow">
+        <div class="app-sc"><div class="app-sv" id="d0d">0</div><div class="app-sl">complétées</div></div>
+        <div class="app-sc"><div class="app-sv" id="d0t">—</div><div class="app-sl">séries total</div></div>
+        <div class="app-sc"><div class="app-sv" id="d0p">0%</div><div class="app-sl">progression</div></div>
+      </div>
+      <div class="app-pt"><div class="app-pf" id="d0b"></div></div>
+      <div id="exlist0"></div>
+      <button class="app-reset" onclick="resetDay(0)">↺ Réinitialiser la séance</button>
+    </div>
+
+    <div class="app-page" id="page1">
+      <div class="app-ph">
+        <div class="app-psup"><span id="sup1">Séance B</span><span class="app-saved" id="sv1">✓ sauvegardé</span></div>
+        <div class="app-ptitle"><strong id="title1">—</strong></div>
+      </div>
+      <div class="app-srow">
+        <div class="app-sc"><div class="app-sv" id="d1d">0</div><div class="app-sl">complétées</div></div>
+        <div class="app-sc"><div class="app-sv" id="d1t">—</div><div class="app-sl">séries total</div></div>
+        <div class="app-sc"><div class="app-sv" id="d1p">0%</div><div class="app-sl">progression</div></div>
+      </div>
+      <div class="app-pt"><div class="app-pf" id="d1b"></div></div>
+      <div id="exlist1"></div>
+      <button class="app-reset" onclick="resetDay(1)">↺ Réinitialiser la séance</button>
+    </div>
+
+    <div class="app-page" id="page2">
+      <div class="app-ph">
+        <div class="app-psup"><span id="sup2">Séance C</span><span class="app-saved" id="sv2">✓ sauvegardé</span></div>
+        <div class="app-ptitle"><strong id="title2">—</strong></div>
+      </div>
+      <div class="app-srow">
+        <div class="app-sc"><div class="app-sv" id="d2d">0</div><div class="app-sl">complétées</div></div>
+        <div class="app-sc"><div class="app-sv" id="d2t">—</div><div class="app-sl">séries total</div></div>
+        <div class="app-sc"><div class="app-sv" id="d2p">0%</div><div class="app-sl">progression</div></div>
+      </div>
+      <div class="app-pt"><div class="app-pf" id="d2b"></div></div>
+      <div id="exlist2"></div>
+      <button class="app-reset" onclick="resetDay(2)">↺ Réinitialiser la séance</button>
+    </div>
+
+    <div class="app-page" id="page3">
+      <div class="app-ph">
+        <div class="app-psup">Programme perte de poids · Mode dynamique</div>
+        <div class="app-ptitle"><strong>Récap</strong> hebdomadaire</div>
+      </div>
+      <div class="app-wknav">
+        <button class="app-wkbtn" onclick="changeWeek(-1)">←</button>
+        <div style="flex:1;text-align:center;">
+          <div id="wkLabel" style="font-weight:700;color:var(--rose-dark);font-size:14px;">Semaine 1 / 4</div>
+        </div>
+        <button class="app-wkbtn" onclick="changeWeek(1)">→</button>
+      </div>
+      <div class="app-rw" id="recapCards"></div>
+      <div class="app-srow" style="margin-bottom:10px">
+        <div class="app-sc"><div class="app-sv">3</div><div class="app-sl">séances / sem.</div></div>
+        <div class="app-sc"><div class="app-sv" id="totalSeries">—</div><div class="app-sl">séries / sem.</div></div>
+      </div>
+      <div class="app-secl">Volume par groupe musculaire — semaine en cours</div>
+      <div id="vlist"></div>
+
+      <div class="app-secl">L'essentiel</div>
+      <div class="app-tb">
+        <div class="app-tip"><div class="app-tdot"></div>Déficit calorique 400–500 kcal/jour · 1,6–2 g de protéines/kg · 8 000–10 000 pas/jour en dehors des séances.</div>
+        <div class="app-tip"><div class="app-tdot"></div>Règle chaque machine avant de commencer, contrôle le mouvement dans les deux sens (2s montée · 3s descente), ne saute jamais l'échauffement.</div>
+        <div class="app-tip"><div class="app-tdot"></div>Régularité &gt; perfection — 3 séances imparfaites valent mieux que 0. Compte en semaines, pas en jours.</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="app-nav">
+    <button class="app-nb active" data-d="0" onclick="goToPage(0)"><div class="app-dot">A</div>Séance A</button>
+    <button class="app-nb" data-d="1" onclick="goToPage(1)"><div class="app-dot">B</div>Séance B</button>
+    <button class="app-nb" data-d="2" onclick="goToPage(2)"><div class="app-dot">C</div>Séance C</button>
+    <button class="app-nb" data-d="3" onclick="goToPage(3)"><div class="app-dot">R</div>Récap</button>
+  </nav>
+
+<div id="restTimerBar" class="rest-timer-bar">
+  <div class="rt-row1">
+    <span id="rtLabel" class="rt-label">Repos</span>
+    <span id="rtCd" class="rt-cd">0:60</span>
+  </div>
+  <div class="rt-row2">
+    <div class="rt-track"><div id="rtFill" class="rt-fill"></div></div>
+    <button class="rt-btn" onclick="addRestTime(15)">+15s</button>
+    <button class="rt-btn" onclick="skipRest()">⏭ Passer</button>
+  </div>
+</div>
+
+<script>
+function showWeek(n) {
+  document.querySelectorAll('.week-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.week-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('week' + n).classList.add('active');
+  document.querySelectorAll('.week-btn')[n-1].classList.add('active');
+}
+
+// ─── MINUTEUR DE REPOS ──────────────────────────────────────────────────────
+let restIv = null, restRem = 0, restTotal = 0;
+
+function startRest(dur, name) {
+  dur = parseInt(dur, 10) || 60;
+  name = name || 'Repos';
+  clearInterval(restIv);
+  restTotal = dur; restRem = dur;
+
+  const bar = document.getElementById('restTimerBar');
+  const lbl = document.getElementById('rtLabel');
+  const cd = document.getElementById('rtCd');
+  const fill = document.getElementById('rtFill');
+  if (!bar || !lbl || !cd || !fill) return;
+
+  lbl.textContent = `${name} · repos ${dur}s`;
+  cd.className = 'rt-cd';
+  fill.className = 'rt-fill';
+  fill.style.width = '0%';
+  bar.classList.add('visible');
+
+  function tick() {
+    if (restRem <= 0) {
+      clearInterval(restIv);
+      try { if (navigator.vibrate) navigator.vibrate([150, 80, 150, 80, 200]); } catch (e) {}
+      cd.textContent = '✓ Go !';
+      cd.className = 'rt-cd ok';
+      fill.style.width = '100%';
+      setTimeout(() => { bar.classList.remove('visible'); fill.style.width = '0%'; }, 2500);
+      return;
+    }
+    const m = Math.floor(restRem / 60), s = restRem % 60;
+    cd.textContent = `${m}:${String(s).padStart(2, '0')}`;
+    cd.className = restRem <= 10 ? 'rt-cd urgent' : 'rt-cd';
+    const pct = Math.round((1 - restRem / restTotal) * 100);
+    fill.style.transition = 'width 1s linear';
+    fill.style.width = pct + '%';
+    fill.className = restRem <= 10 ? 'rt-fill urgent' : 'rt-fill';
+    restRem--;
+  }
+  tick();
+  restIv = setInterval(tick, 1000);
+}
+
+function addRestTime(s) {
+  restRem = Math.min(restRem + s, restTotal + 120);
+}
+
+function skipRest() {
+  clearInterval(restIv);
+  const bar = document.getElementById('restTimerBar');
+  if (bar) bar.classList.remove('visible');
+}
+
+// ─── PROGRAMME DYNAMIQUE (4 semaines) ──────────────────────────────────────
+const PROGRAM = [[{"day": "Lundi — Séance A", "focus": "Pousser + Avant", "cardio": "Cardio : elliptique ou vélo 25 min · zone confortable", "exercises": [{"name": "Leg press", "muscle": "Quadriceps · Fessiers", "rest": 60, "setsCount": 3, "reps": "12", "weight": "30", "bodyweight": false, "isTime": false, "special": false}, {"name": "Chest press machine", "muscle": "Pectoraux · Triceps", "rest": 60, "setsCount": 3, "reps": "12", "weight": "12", "bodyweight": false, "isTime": false, "special": false}, {"name": "Développé épaules guidé", "muscle": "Épaules · Triceps", "rest": 60, "setsCount": 3, "reps": "12", "weight": "8", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg extension (quadriceps)", "muscle": "Quadriceps", "rest": 45, "setsCount": 3, "reps": "15", "weight": "15", "bodyweight": false, "isTime": false, "special": false}, {"name": "Crunchs machine (abdos)", "muscle": "Abdominaux", "rest": 45, "setsCount": 3, "reps": "15", "weight": "15", "bodyweight": false, "isTime": false, "special": false}]}, {"day": "Mercredi — Séance B", "focus": "Tirer + Arrière", "cardio": "Cardio : tapis incliné 25 min · allure vive", "exercises": [{"name": "Tirage poulie haute (dos)", "muscle": "Grand dorsal · Biceps", "rest": 60, "setsCount": 3, "reps": "12", "weight": "18", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg curl allongé", "muscle": "Ischio-jambiers", "rest": 60, "setsCount": 3, "reps": "12", "weight": "12", "bodyweight": false, "isTime": false, "special": false}, {"name": "Tirage horizontal câble", "muscle": "Dos · Rhomboïdes", "rest": 60, "setsCount": 3, "reps": "12", "weight": "15", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg press pieds hauts (fessiers)", "muscle": "Fessiers · Ischios", "rest": 45, "setsCount": 3, "reps": "15", "weight": "25", "bodyweight": false, "isTime": false, "special": false}, {"name": "Extension dorsale machine", "muscle": "Lombaires · Fessiers", "rest": 45, "setsCount": 3, "reps": "12", "weight": "poids du corps", "bodyweight": true, "isTime": false, "special": false}]}, {"day": "Vendredi — Séance C", "focus": "Total · Fessiers+", "cardio": "Cardio : elliptique 25 min · résistance modérée", "exercises": [{"name": "Leg press pieds hauts (fessiers)", "muscle": "Fessiers · Ischios", "rest": 60, "setsCount": 3, "reps": "15", "weight": "25", "bodyweight": false, "isTime": false, "special": false}, {"name": "Tirage poulie haute", "muscle": "Grand dorsal", "rest": 60, "setsCount": 3, "reps": "12", "weight": "18", "bodyweight": false, "isTime": false, "special": false}, {"name": "Abducteur + adducteur", "muscle": "Face externe/interne cuisses", "rest": 45, "setsCount": 3, "reps": "15 chaque", "weight": "20", "bodyweight": false, "isTime": false, "special": false}, {"name": "Curl biceps machine", "muscle": "Biceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "6", "bodyweight": false, "isTime": false, "special": false}, {"name": "Gainage planche (sol)", "muscle": "Abdos · Gainage profond", "rest": 20, "setsCount": 3, "reps": "30 s", "weight": null, "bodyweight": false, "isTime": true, "special": false}]}], [{"day": "Lundi — Séance A", "focus": "Pousser + Avant", "cardio": "Cardio : elliptique 27 min · résistance +1 cran", "exercises": [{"name": "Leg press", "muscle": "Quadriceps · Fessiers", "rest": 45, "setsCount": 3, "reps": "12", "weight": "32", "bodyweight": false, "isTime": false, "special": false}, {"name": "Chest press machine", "muscle": "Pectoraux · Triceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "13", "bodyweight": false, "isTime": false, "special": false}, {"name": "Développé épaules guidé", "muscle": "Épaules", "rest": 45, "setsCount": 3, "reps": "12", "weight": "9", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg extension", "muscle": "Quadriceps", "rest": 45, "setsCount": 3, "reps": "15", "weight": "15", "bodyweight": false, "isTime": false, "special": false}, {"name": "Triceps poulie haute", "muscle": "Triceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "8", "bodyweight": false, "isTime": false, "special": false}]}, {"day": "Mercredi — Séance B", "focus": "Tirer + Arrière", "cardio": "Cardio : tapis incliné 27 min · vitesse 5.5–6", "exercises": [{"name": "Tirage poulie haute", "muscle": "Grand dorsal · Biceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "19", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg curl allongé", "muscle": "Ischio-jambiers", "rest": 45, "setsCount": 3, "reps": "12", "weight": "13", "bodyweight": false, "isTime": false, "special": false}, {"name": "Tirage horizontal câble", "muscle": "Dos · Rhomboïdes", "rest": 45, "setsCount": 3, "reps": "12", "weight": "15", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg press pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 3, "reps": "15", "weight": "27", "bodyweight": false, "isTime": false, "special": false}, {"name": "Mollets machine", "muscle": "Mollets", "rest": 30, "setsCount": 3, "reps": "15", "weight": "25", "bodyweight": false, "isTime": false, "special": false}]}, {"day": "Vendredi — Séance C", "focus": "Total · Fessiers+", "cardio": "Cardio : vélo 30 min · résistance moyenne", "exercises": [{"name": "Leg press pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 3, "reps": "15", "weight": "27", "bodyweight": false, "isTime": false, "special": false}, {"name": "Tirage poulie haute", "muscle": "Dos", "rest": 45, "setsCount": 3, "reps": "12", "weight": "18", "bodyweight": false, "isTime": false, "special": false}, {"name": "Abducteur + adducteur", "muscle": "Cuisses interne/externe", "rest": 45, "setsCount": 3, "reps": "15 chaque", "weight": "20", "bodyweight": false, "isTime": false, "special": false}, {"name": "Curl biceps machine", "muscle": "Biceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "6", "bodyweight": false, "isTime": false, "special": false}, {"name": "Gainage planche", "muscle": "Abdos profonds", "rest": 20, "setsCount": 3, "reps": "40 s", "weight": null, "bodyweight": false, "isTime": true, "special": false}]}], [{"day": "Lundi — Séance A", "focus": "Pousser + Avant", "cardio": "Cardio : elliptique 30 min · intervalles 2 min fort / 1 min calme", "exercises": [{"name": "Leg press", "muscle": "Quadriceps · Fessiers", "rest": 45, "setsCount": 4, "reps": "10", "weight": "36", "bodyweight": false, "isTime": false, "special": false}, {"name": "Chest press machine", "muscle": "Pectoraux", "rest": 45, "setsCount": 4, "reps": "10", "weight": "15", "bodyweight": false, "isTime": false, "special": false}, {"name": "Développé épaules guidé", "muscle": "Épaules", "rest": 45, "setsCount": 4, "reps": "10", "weight": "11", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg extension superset", "muscle": "Quadriceps", "rest": 45, "setsCount": 4, "reps": "12", "weight": "17", "bodyweight": false, "isTime": false, "special": false}, {"name": "Crunchs machine", "muscle": "Abdominaux", "rest": 30, "setsCount": 4, "reps": "15", "weight": "17", "bodyweight": false, "isTime": false, "special": false}]}, {"day": "Mercredi — Séance B", "focus": "Tirer + Arrière", "cardio": "Cardio : tapis incliné 30 min · vitesse 6", "exercises": [{"name": "Tirage poulie haute", "muscle": "Grand dorsal", "rest": 45, "setsCount": 4, "reps": "10", "weight": "22", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg curl allongé", "muscle": "Ischio-jambiers", "rest": 45, "setsCount": 4, "reps": "10", "weight": "15", "bodyweight": false, "isTime": false, "special": false}, {"name": "Tirage horizontal câble", "muscle": "Dos · Rhomboïdes", "rest": 45, "setsCount": 4, "reps": "10", "weight": "18", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg press pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 4, "reps": "12", "weight": "30", "bodyweight": false, "isTime": false, "special": false}, {"name": "Extension dorsale machine", "muscle": "Lombaires", "rest": 45, "setsCount": 3, "reps": "12", "weight": "poids du corps (+ lest léger en option)", "bodyweight": true, "isTime": false, "special": false}]}, {"day": "Vendredi — Séance C", "focus": "Total · Fessiers+", "cardio": "Cardio : vélo 33 min · intervalles 1 min fort / 2 min calme", "exercises": [{"name": "Leg press pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 4, "reps": "12", "weight": "30", "bodyweight": false, "isTime": false, "special": false}, {"name": "Tirage poulie haute", "muscle": "Dos", "rest": 45, "setsCount": 4, "reps": "10", "weight": "22", "bodyweight": false, "isTime": false, "special": false}, {"name": "Abducteur + adducteur", "muscle": "Cuisses", "rest": 30, "setsCount": 4, "reps": "15 chaque", "weight": "23", "bodyweight": false, "isTime": false, "special": false}, {"name": "Curl biceps + triceps circuit", "muscle": "Bras", "rest": 30, "setsCount": 3, "reps": "12 chaque", "weight": "8", "bodyweight": false, "isTime": false, "special": false}, {"name": "Gainage planche", "muscle": "Abdos profonds", "rest": 20, "setsCount": 4, "reps": "40 s", "weight": null, "bodyweight": false, "isTime": true, "special": false}]}], [{"day": "Lundi — Séance A", "focus": "Pousser + Avant", "cardio": "Cardio : elliptique 35 min · résistance haute", "exercises": [{"name": "Leg press (charge max)", "muscle": "Quadriceps · Fessiers", "rest": 45, "setsCount": 4, "reps": "10", "weight": "37", "bodyweight": false, "isTime": false, "special": false}, {"name": "Chest press machine", "muscle": "Pectoraux", "rest": 45, "setsCount": 4, "reps": "10", "weight": "16", "bodyweight": false, "isTime": false, "special": false}, {"name": "Développé épaules guidé", "muscle": "Épaules", "rest": 45, "setsCount": 4, "reps": "10", "weight": "12", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg extension + mollets", "muscle": "Quadriceps · Mollets", "rest": 45, "setsCount": 4, "reps": "12 (ext. ~18 kg) + 15 (mollets ~27 kg)", "weight": null, "special": true}, {"name": "Crunchs machine", "muscle": "Abdominaux", "rest": 30, "setsCount": 4, "reps": "20", "weight": "18", "bodyweight": false, "isTime": false, "special": false}]}, {"day": "Mercredi — Séance B", "focus": "Tirer + Arrière", "cardio": "Cardio : tapis incliné 35 min · vitesse 6–6.5", "exercises": [{"name": "Tirage poulie haute", "muscle": "Grand dorsal", "rest": 45, "setsCount": 4, "reps": "10", "weight": "23", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg curl allongé", "muscle": "Ischio-jambiers", "rest": 45, "setsCount": 4, "reps": "12", "weight": "16", "bodyweight": false, "isTime": false, "special": false}, {"name": "Tirage horizontal câble", "muscle": "Dos", "rest": 45, "setsCount": 4, "reps": "10", "weight": "19", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg press pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 4, "reps": "15", "weight": "31", "bodyweight": false, "isTime": false, "special": false}, {"name": "Extension dorsale machine", "muscle": "Lombaires", "rest": 45, "setsCount": 3, "reps": "15", "weight": "poids du corps (+ lest léger en option)", "bodyweight": true, "isTime": false, "special": false}]}, {"day": "Vendredi — Séance C", "focus": "Total · Bilan", "cardio": "Cardio final : 35 min vélo · bilan de tes 4 semaines !", "exercises": [{"name": "Leg press pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 4, "reps": "15", "weight": "31", "bodyweight": false, "isTime": false, "special": false}, {"name": "Leg press", "muscle": "Jambes", "rest": 45, "setsCount": 4, "reps": "10", "weight": "37", "bodyweight": false, "isTime": false, "special": false}, {"name": "Tirage poulie haute", "muscle": "Dos", "rest": 45, "setsCount": 4, "reps": "10", "weight": "23", "bodyweight": false, "isTime": false, "special": false}, {"name": "Abducteur + adducteur", "muscle": "Cuisses", "rest": 30, "setsCount": 4, "reps": "15", "weight": "24", "bodyweight": false, "isTime": false, "special": false}, {"name": "Gainage planche", "muscle": "Abdos profonds", "rest": 20, "setsCount": 4, "reps": "50 s", "weight": null, "bodyweight": false, "isTime": true, "special": false}]}]];
+const NUM_WEEKS = PROGRAM.length;
+const WEEK_KEY = 'fb_current_week';
+let currentWeek = Math.min(NUM_WEEKS, Math.max(1, parseInt(localStorage.getItem(WEEK_KEY) || '1', 10)));
+
+const STORAGE_KEY = 'fb_perte_poids_v1';
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch (e) { return {}; }
+}
+function saveState(s) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+function currentDay(d) { return PROGRAM[currentWeek - 1][d]; }
+
+function buildExList(d) {
+  const day = currentDay(d);
+  const list = document.getElementById('exlist' + d);
+  if (!list) return;
+  list.innerHTML = '';
+  const state = loadState();
+
+  day.exercises.forEach((ex, ei) => {
+    const card = document.createElement('div');
+    card.className = 'app-ec';
+
+    if (ex.special) {
+      card.innerHTML =
+        `<div class="app-en">${ex.name}</div><div class="app-em">${ex.muscle}</div>` +
+        `<div class="app-etarget">${ex.setsCount} séries · ${ex.reps}</div>` +
+        `<div class="app-note">Exercice combiné — pas de suivi série par série, ajuste au ressenti.</div>`;
+      list.appendChild(card);
+      return;
+    }
+
+    const weightLabel = ex.bodyweight ? 'poids du corps' : (ex.weight ? '~' + ex.weight + ' kg' : '');
+    card.innerHTML =
+      `<div class="app-en">${ex.name}</div><div class="app-em">${ex.muscle}</div>` +
+      `<div class="app-etarget">${ex.setsCount} × ${ex.reps}${weightLabel ? ' · ' + weightLabel : ''} · repos ${ex.rest}s</div>`;
+
+    const tracker = document.createElement('div');
+    tracker.className = 'set-tracker';
+
+    for (let s = 0; s < ex.setsCount; s++) {
+      const key = `w${currentWeek}_d${d}_e${ei}_s${s}`;
+      const entry = state[key] || {};
+
+      if (!ex.bodyweight && !ex.isTime) {
+        const wt = document.createElement('input');
+        wt.type = 'text';
+        wt.inputMode = 'decimal';
+        wt.className = 'sb-wt';
+        wt.placeholder = ex.weight || '';
+        wt.value = entry.weight !== undefined ? entry.weight : '';
+        wt.addEventListener('change', () => {
+          const st = loadState();
+          st[key] = st[key] || {};
+          st[key].weight = wt.value;
+          saveState(st);
+        });
+        tracker.appendChild(wt);
+        const unit = document.createElement('span');
+        unit.className = 'sb-unit';
+        unit.textContent = 'kg';
+        tracker.appendChild(unit);
+      }
+
+      const box = document.createElement('div');
+      box.className = 'sb' + (entry.done ? ' done' : '');
+      box.textContent = s + 1;
+      box.addEventListener('click', () => {
+        const st = loadState();
+        st[key] = st[key] || {};
+        st[key].done = !st[key].done;
+        saveState(st);
+        box.classList.toggle('done', st[key].done);
+        updateDayStats(d);
+        showSaved(d);
+        if (st[key].done) startRest(ex.rest, ex.name);
+      });
+      tracker.appendChild(box);
+    }
+
+    card.appendChild(tracker);
+    list.appendChild(card);
+  });
+}
+
+function showSaved(d) {
+  const sv = document.getElementById('sv' + d);
+  if (!sv) return;
+  sv.classList.add('show');
+  clearTimeout(sv._t);
+  sv._t = setTimeout(() => sv.classList.remove('show'), 1500);
+}
+
+function updateDayStats(d) {
+  const day = currentDay(d);
+  const state = loadState();
+  let total = 0, done = 0;
+  day.exercises.forEach((ex, ei) => {
+    if (ex.special) return;
+    for (let s = 0; s < ex.setsCount; s++) {
+      total++;
+      const key = `w${currentWeek}_d${d}_e${ei}_s${s}`;
+      if (state[key] && state[key].done) done++;
+    }
+  });
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  const dd = document.getElementById('d' + d + 'd'); if (dd) dd.textContent = done;
+  const dt = document.getElementById('d' + d + 't'); if (dt) dt.textContent = total;
+  const dp = document.getElementById('d' + d + 'p'); if (dp) dp.textContent = pct + '%';
+  const db = document.getElementById('d' + d + 'b'); if (db) db.style.width = pct + '%';
+}
+
+function buildHeader(d) {
+  const day = currentDay(d);
+  const sup = document.getElementById('sup' + d); if (sup) sup.textContent = day.day;
+  const title = document.getElementById('title' + d); if (title) title.textContent = day.focus;
+}
+
+function refreshDay(d) {
+  buildHeader(d);
+  buildExList(d);
+  updateDayStats(d);
+}
+
+function goToPage(n) {
+  document.querySelectorAll('.app-page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.app-nb').forEach(el => el.classList.remove('active'));
+  const page = document.getElementById('page' + n);
+  const nb = document.querySelectorAll('.app-nb')[n];
+  if (page) page.classList.add('active');
+  if (nb) nb.classList.add('active');
+  if (n === 3) buildRecap();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function resetDay(d) {
+  if (!confirm('Réinitialiser les séries cochées et les poids de cette séance ?')) return;
+  const day = currentDay(d);
+  const state = loadState();
+  day.exercises.forEach((ex, ei) => {
+    if (ex.special) return;
+    for (let s = 0; s < ex.setsCount; s++) delete state[`w${currentWeek}_d${d}_e${ei}_s${s}`];
+  });
+  saveState(state);
+  refreshDay(d);
+}
+
+function changeWeek(delta) {
+  const nw = currentWeek + delta;
+  if (nw < 1 || nw > NUM_WEEKS) return;
+  currentWeek = nw;
+  localStorage.setItem(WEEK_KEY, String(nw));
+  [0, 1, 2].forEach(refreshDay);
+  buildRecap();
+}
+
+function buildRecapCards() {
+  const c = document.getElementById('recapCards');
+  if (!c) return;
+  c.innerHTML = '';
+  const state = loadState();
+  [0, 1, 2].forEach(d => {
+    const day = currentDay(d);
+    let total = 0, done = 0;
+    day.exercises.forEach((ex, ei) => {
+      if (ex.special) return;
+      for (let s = 0; s < ex.setsCount; s++) {
+        total++;
+        const key = `w${currentWeek}_d${d}_e${ei}_s${s}`;
+        if (state[key] && state[key].done) done++;
+      }
+    });
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const card = document.createElement('div');
+    card.className = 'app-rd';
+    card.onclick = () => goToPage(d);
+    card.innerHTML =
+      `<div class="app-rdl">${day.day.split(' — ')[0]}</div>` +
+      `<div class="app-rdn">${day.focus}</div>` +
+      `<div class="app-rdm">${day.exercises.length} ex · ${total} séries</div>` +
+      `<div class="app-rdp"><div class="app-rdpf" style="width:${pct}%"></div></div>`;
+    c.appendChild(card);
+  });
+  const totalSeries = [0, 1, 2].reduce((a, d) => a + currentDay(d).exercises.reduce((b, ex) => b + (ex.special ? 0 : ex.setsCount), 0), 0);
+  const ts = document.getElementById('totalSeries');
+  if (ts) ts.textContent = totalSeries;
+}
+
+function buildVolume() {
+  const list = document.getElementById('vlist');
+  if (!list) return;
+  list.innerHTML = '';
+  const vm = {};
+  [0, 1, 2].forEach(d => currentDay(d).exercises.forEach(ex => {
+    if (ex.special) return;
+    ex.muscle.split(' · ').forEach(m => { vm[m] = (vm[m] || 0) + ex.setsCount; });
+  }));
+  const maxV = Math.max(...Object.values(vm), 1);
+  Object.entries(vm).sort((a, b) => b[1] - a[1]).forEach(([name, sets]) => {
+    const pct = Math.round((sets / maxV) * 100);
+    const row = document.createElement('div');
+    row.className = 'app-vr';
+    row.innerHTML =
+      `<div class="app-vn">${name}</div>` +
+      `<div class="app-vtrack"><div class="app-vbar" style="width:${pct}%"></div></div>` +
+      `<div class="app-vs">${sets} s.</div>`;
+    list.appendChild(row);
+  });
+}
+
+function buildRecap() {
+  const wl = document.getElementById('wkLabel');
+  if (wl) wl.textContent = `Semaine ${currentWeek} / ${NUM_WEEKS}`;
+  buildRecapCards();
+  buildVolume();
+}
+
+[0, 1, 2].forEach(refreshDay);
+buildRecap();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
