@@ -1,9 +1,9 @@
-const CACHE_NAME = 'ppl-entretien-v2';
+const CACHE_NAME = 'perte-de-poids-v6';
 const ASSETS = [
   './index.html',
   './manifest.json',
-  './ppl-icon-192.png',
-  './ppl-icon-512.png'
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
