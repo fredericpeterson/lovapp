@@ -519,6 +519,12 @@
   }
   .sb-wt:focus { outline: none; border-color: var(--rose-dark); }
   .sb-unit { font-size: 10px; color: #b5758f; margin-right: 10px; }
+  .wk-notice { margin: -6px 0 14px; padding: 9px 10px; border-radius: 10px; background: #fff; border: 1px dashed var(--rose-mid); font-size: 11.5px; color: var(--rose-dark); line-height: 1.5; }
+  .wk-notice-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .rest-choice { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; font-size: 11.5px; color: var(--rose-dark); }
+  .rest-chip { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--rose-mid); background: var(--rose-light); color: var(--rose-dark); font-size: 11.5px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s, transform 0.1s; }
+  .rest-chip:active { transform: scale(0.96); }
+  .rest-chip.active { background: var(--rose-dark); border-color: var(--rose-dark); color: #fff; }
 
   .card-progress { margin-top: 10px; }
   .card-progress-track { height: 5px; background: #f2d5de; border-radius: 99px; overflow: hidden; }
@@ -564,6 +570,7 @@
         <div class="app-sc"><div class="app-sv" id="d0p">0%</div><div class="app-sl">progression</div></div>
       </div>
       <div class="app-pt"><div class="app-pf" id="d0b"></div></div>
+      <div class="rest-choice" data-rest-choice></div>
       <div id="exlist0"></div>
       <button class="app-reset" onclick="resetDay(0)">↺ Réinitialiser la séance</button>
     </div>
@@ -579,6 +586,7 @@
         <div class="app-sc"><div class="app-sv" id="d1p">0%</div><div class="app-sl">progression</div></div>
       </div>
       <div class="app-pt"><div class="app-pf" id="d1b"></div></div>
+      <div class="rest-choice" data-rest-choice></div>
       <div id="exlist1"></div>
       <button class="app-reset" onclick="resetDay(1)">↺ Réinitialiser la séance</button>
     </div>
@@ -594,6 +602,7 @@
         <div class="app-sc"><div class="app-sv" id="d2p">0%</div><div class="app-sl">progression</div></div>
       </div>
       <div class="app-pt"><div class="app-pf" id="d2b"></div></div>
+      <div class="rest-choice" data-rest-choice></div>
       <div id="exlist2"></div>
       <button class="app-reset" onclick="resetDay(2)">↺ Réinitialiser la séance</button>
     </div>
@@ -612,6 +621,7 @@
         <button class="app-wkbtn" onclick="changeWeek(1)">→</button>
       </div>
       <select id="wkSelect" onchange="gotoWeek(this.value)" style="width:100%;margin-bottom:14px;padding:9px 10px;border:1px solid var(--rose-mid);border-radius:10px;background:var(--rose-light);color:var(--rose-dark);font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;"></select>
+      <div id="wkNotice" class="wk-notice" style="display:none;"></div>
       <div class="app-rw" id="recapCards"></div>
       <div class="app-srow" style="margin-bottom:10px">
         <div class="app-sc"><div class="app-sv">3</div><div class="app-sl">séances / sem.</div></div>
@@ -624,7 +634,7 @@
       <div class="app-secl">L'essentiel</div>
       <div class="app-tb">
         <div class="app-tip"><div class="app-tdot"></div>Déficit calorique 400–500 kcal/jour · 1,6–2 g de protéines/kg · 8 000–10 000 pas/jour en dehors des séances.</div>
-        <div class="app-tip"><div class="app-tdot"></div>Plan sur 1 an : 13 cycles de 4 semaines. Chaque cycle repart un cran plus bas que le pic précédent puis remonte — charges +5 %, cardio +1 min et gainage +5 s par cycle. Si une charge est trop dure, garde celle du cycle d'avant.</div>
+        <div class="app-tip"><div class="app-tdot"></div>Plan sur 1 an : 13 cycles de 4 semaines. Les charges montent un peu chaque semaine (jusqu'à +50 % en fin d'année) sans jamais redescendre ; cardio +1 min et gainage +5 s par cycle. Si une charge est trop dure, garde celle de la semaine d'avant.</div>
         <div class="app-tip"><div class="app-tdot"></div>Cardio : après la musculation, à un rythme où tu peux encore parler (zone 2). Les intervalles des semaines 3-4 sont les seuls moments « durs ».</div>
         <div class="app-tip"><div class="app-tdot"></div>Règle chaque machine avant de commencer, contrôle le mouvement dans les deux sens (2s montée · 3s descente), ne saute jamais l'échauffement.</div>
         <div class="app-tip"><div class="app-tdot"></div>Régularité &gt; perfection — 3 séances imparfaites valent mieux que 0. Compte en semaines, pas en jours.</div>
@@ -658,6 +668,7 @@
   </div>
   <div class="rt-row2">
     <div class="rt-track"><div id="rtFill" class="rt-fill"></div></div>
+    <button class="rt-btn" id="rtSound" onclick="toggleRestSound()" aria-label="Son de fin de repos" title="Son de fin de repos">🔔</button>
     <button class="rt-btn" onclick="addRestTime(15)">+15s</button>
     <button class="rt-btn" onclick="skipRest()">⏭ Passer</button>
   </div>
@@ -674,9 +685,87 @@ function showWeek(n) {
 // ─── MINUTEUR DE REPOS ──────────────────────────────────────────────────────
 let restIv = null, restRem = 0, restTotal = 0;
 
+// Durée de repos choisie : 'auto' (valeur prévue par le programme) ou 30 / 45 / 60 s pour TOUS les exercices
+const REST_KEY = 'fb_rest_choice';
+let restChoice = 'auto';
+try { const v = localStorage.getItem(REST_KEY); if (['30', '45', '60'].includes(v)) restChoice = v; } catch (e) {}
+function restFor(ex) { return restChoice === 'auto' ? ex.rest : parseInt(restChoice, 10); }
+function renderRestChoice() {
+  const opts = [['auto', 'Auto'], ['30', '30 s'], ['45', '45 s'], ['60', '60 s']];
+  document.querySelectorAll('[data-rest-choice]').forEach(box => {
+    box.innerHTML = '<span>Repos :</span>' + opts.map(([v, l]) =>
+      `<button class="rest-chip${restChoice === v ? ' active' : ''}" ${v === 'auto' ? 'title="Durée prévue par le programme pour chaque exercice" ' : ''}onclick="setRestChoice('${v}')">${l}</button>`
+    ).join('');
+  });
+}
+function setRestChoice(v) {
+  restChoice = v;
+  try { localStorage.setItem(REST_KEY, v); } catch (e) {}
+  renderRestChoice();
+  [0, 1, 2].forEach(refreshDay);   // met à jour « repos Xs » sur chaque exercice
+}
+
+// Son de fin de repos (Web Audio, aucun fichier externe → fonctionne hors-ligne)
+let restAudioCtx = null;
+let restSoundOn = true;
+try { restSoundOn = localStorage.getItem('restSound') !== '0'; } catch (e) {}
+
+function unlockRestAudio() {
+  // Doit être appelé depuis un geste utilisateur (tap) pour que le navigateur autorise le son
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!restAudioCtx) restAudioCtx = new AC();
+    if (restAudioCtx.state === 'suspended') restAudioCtx.resume();
+  } catch (e) {}
+}
+
+function beep(freq, delay, dur, vol) {
+  try {
+    if (!restAudioCtx) return;
+    const t0 = restAudioCtx.currentTime + (delay || 0);
+    const osc = restAudioCtx.createOscillator();
+    const gain = restAudioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(vol || 0.4, t0 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(gain);
+    gain.connect(restAudioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.05);
+  } catch (e) {}
+}
+
+function playRestTick() {   // petit bip à 3, 2, 1
+  if (restSoundOn) beep(660, 0, 0.12, 0.25);
+}
+
+function playRestEnd() {    // triple bip montant à la fin du repos
+  if (!restSoundOn) return;
+  beep(880, 0, 0.18, 0.45);
+  beep(880, 0.25, 0.18, 0.45);
+  beep(1175, 0.5, 0.40, 0.5);
+}
+
+function updateSoundBtn() {
+  const b = document.getElementById('rtSound');
+  if (b) b.textContent = restSoundOn ? '🔔' : '🔇';
+}
+
+function toggleRestSound() {
+  restSoundOn = !restSoundOn;
+  try { localStorage.setItem('restSound', restSoundOn ? '1' : '0'); } catch (e) {}
+  updateSoundBtn();
+  if (restSoundOn) { unlockRestAudio(); beep(880, 0, 0.18, 0.4); }
+}
+
 function startRest(dur, name) {
   dur = parseInt(dur, 10) || 60;
   name = name || 'Repos';
+  unlockRestAudio();
+  updateSoundBtn();
   clearInterval(restIv);
   restTotal = dur; restRem = dur;
 
@@ -696,6 +785,7 @@ function startRest(dur, name) {
     if (restRem <= 0) {
       clearInterval(restIv);
       try { if (navigator.vibrate) navigator.vibrate([150, 80, 150, 80, 200]); } catch (e) {}
+      playRestEnd();
       cd.textContent = '✓ Go !';
       cd.className = 'rt-cd ok';
       fill.style.width = '100%';
@@ -709,6 +799,7 @@ function startRest(dur, name) {
     fill.style.transition = 'width 1s linear';
     fill.style.width = pct + '%';
     fill.className = restRem <= 10 ? 'rt-fill urgent' : 'rt-fill';
+    if (restRem <= 3) playRestTick();
     restRem--;
   }
   tick();
@@ -727,11 +818,14 @@ function skipRest() {
 
 // ─── PROGRAMME DYNAMIQUE (4 semaines) ──────────────────────────────────────
 const ICONS = {"leg-press": "<svg viewBox=\"0 0 100 100\"><rect x=\"6\" y=\"76\" width=\"88\" height=\"6\" rx=\"3\" fill=\"#5c5c66\"/><rect x=\"55\" y=\"18\" width=\"8\" height=\"60\" rx=\"3\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><rect x=\"76\" y=\"14\" width=\"16\" height=\"30\" rx=\"2\" fill=\"#8fd4bb\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><line x1=\"84\" y1=\"18\" x2=\"84\" y2=\"42\" stroke=\"#1D9E75\" stroke-width=\"2\"/><rect x=\"30\" y=\"46\" width=\"26\" height=\"10\" rx=\"3\" fill=\"#F4C0D1\" stroke=\"#72243E\" stroke-width=\"2\"/><path d=\"M30 51 L18 62 L18 76\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><circle cx=\"18\" cy=\"40\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M18 48 L18 62\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M60 40 L72 34\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"3\" stroke-linecap=\"round\" opacity=\"0.7\"/><path d=\"M68 30 L76 32 L70 38\" fill=\"none\" stroke=\"#1D9E75\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>", "chest-press": "<svg viewBox=\"0 0 100 100\"><rect x=\"6\" y=\"80\" width=\"88\" height=\"6\" rx=\"3\" fill=\"#5c5c66\"/><rect x=\"72\" y=\"24\" width=\"16\" height=\"40\" rx=\"3\" fill=\"#8fd4bb\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><line x1=\"80\" y1=\"28\" x2=\"80\" y2=\"60\" stroke=\"#1D9E75\" stroke-width=\"2\"/><rect x=\"26\" y=\"42\" width=\"16\" height=\"28\" rx=\"6\" fill=\"#F4C0D1\" stroke=\"#72243E\" stroke-width=\"2\"/><circle cx=\"34\" cy=\"34\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M40 50 L60 44\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M40 58 L60 52\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><rect x=\"60\" y=\"40\" width=\"7\" height=\"18\" rx=\"3\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><path d=\"M34 70 L28 80 M34 70 L40 80\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/></svg>", "shoulder-press": "<svg viewBox=\"0 0 100 100\"><rect x=\"6\" y=\"84\" width=\"88\" height=\"6\" rx=\"3\" fill=\"#5c5c66\"/><rect x=\"42\" y=\"58\" width=\"16\" height=\"26\" rx=\"6\" fill=\"#F4C0D1\" stroke=\"#72243E\" stroke-width=\"2\"/><circle cx=\"50\" cy=\"40\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M46 58 L32 32\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M54 58 L68 32\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><rect x=\"26\" y=\"20\" width=\"12\" height=\"14\" rx=\"3\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><rect x=\"62\" y=\"20\" width=\"12\" height=\"14\" rx=\"3\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><rect x=\"18\" y=\"56\" width=\"8\" height=\"28\" rx=\"3\" fill=\"#8fd4bb\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/></svg>", "leg-extension": "<svg viewBox=\"0 0 100 100\"><rect x=\"6\" y=\"90\" width=\"88\" height=\"5\" rx=\"2.5\" fill=\"#5c5c66\"/><rect x=\"20\" y=\"44\" width=\"30\" height=\"26\" rx=\"6\" fill=\"#F4C0D1\" stroke=\"#72243E\" stroke-width=\"2\"/><circle cx=\"30\" cy=\"34\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M28 44 L26 66 L18 90\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M42 62 L64 46\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><rect x=\"66\" y=\"34\" width=\"7\" height=\"16\" rx=\"3\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><rect x=\"80\" y=\"18\" width=\"14\" height=\"34\" rx=\"2\" fill=\"#8fd4bb\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><line x1=\"87\" y1=\"22\" x2=\"87\" y2=\"48\" stroke=\"#1D9E75\" stroke-width=\"2\"/></svg>", "ab-crunch": "<svg viewBox=\"0 0 100 100\"><rect x=\"6\" y=\"88\" width=\"88\" height=\"5\" rx=\"2.5\" fill=\"#5c5c66\"/><rect x=\"52\" y=\"42\" width=\"20\" height=\"30\" rx=\"6\" fill=\"#F4C0D1\" stroke=\"#72243E\" stroke-width=\"2\"/><circle cx=\"40\" cy=\"32\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M40 40 L50 58 L40 78 L40 88\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M50 58 L68 58\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><rect x=\"74\" y=\"36\" width=\"14\" height=\"34\" rx=\"2\" fill=\"#8fd4bb\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><line x1=\"81\" y1=\"40\" x2=\"81\" y2=\"66\" stroke=\"#1D9E75\" stroke-width=\"2\"/></svg>", "lat-pulldown": "<svg viewBox=\"0 0 100 100\"><rect x=\"6\" y=\"90\" width=\"88\" height=\"5\" rx=\"2.5\" fill=\"#5c5c66\"/><rect x=\"42\" y=\"56\" width=\"16\" height=\"30\" rx=\"6\" fill=\"#F4C0D1\" stroke=\"#72243E\" stroke-width=\"2\"/><circle cx=\"50\" cy=\"44\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M46 56 L26 30\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M54 56 L74 30\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><rect x=\"16\" y=\"22\" width=\"68\" height=\"7\" rx=\"3.5\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><rect x=\"46\" y=\"8\" width=\"8\" height=\"16\" rx=\"2\" fill=\"#5c5c66\"/><rect x=\"82\" y=\"34\" width=\"12\" height=\"30\" rx=\"2\" fill=\"#8fd4bb\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/></svg>", "leg-curl": "<svg viewBox=\"0 0 100 100\"><rect x=\"10\" y=\"50\" width=\"52\" height=\"12\" rx=\"6\" fill=\"#F4C0D1\" stroke=\"#72243E\" stroke-width=\"2\"/><circle cx=\"18\" cy=\"38\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M18 46 L48 54\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M48 54 L40 74 L30 86\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><rect x=\"60\" y=\"34\" width=\"30\" height=\"8\" rx=\"4\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><rect x=\"82\" y=\"20\" width=\"12\" height=\"28\" rx=\"2\" fill=\"#8fd4bb\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/></svg>", "seated-row": "<svg viewBox=\"0 0 100 100\"><rect x=\"6\" y=\"86\" width=\"88\" height=\"5\" rx=\"2.5\" fill=\"#5c5c66\"/><rect x=\"58\" y=\"40\" width=\"16\" height=\"30\" rx=\"6\" fill=\"#F4C0D1\" stroke=\"#72243E\" stroke-width=\"2\"/><circle cx=\"66\" cy=\"30\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M62 42 L40 46\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M40 46 L20 48\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><rect x=\"10\" y=\"38\" width=\"10\" height=\"24\" rx=\"2\" fill=\"#8fd4bb\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><line x1=\"15\" y1=\"42\" x2=\"15\" y2=\"58\" stroke=\"#1D9E75\" stroke-width=\"2\"/></svg>", "back-extension": "<svg viewBox=\"0 0 100 100\"><path d=\"M10 74 L52 52\" fill=\"none\" stroke=\"#5c5c66\" stroke-width=\"7\" stroke-linecap=\"round\"/><rect x=\"8\" y=\"72\" width=\"10\" height=\"20\" rx=\"3\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><circle cx=\"66\" cy=\"36\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M60 42 L42 56\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M42 56 L24 58\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M42 56 L48 76 L48 90\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/></svg>", "abductor": "<svg viewBox=\"0 0 100 100\"><rect x=\"6\" y=\"86\" width=\"88\" height=\"5\" rx=\"2.5\" fill=\"#5c5c66\"/><rect x=\"38\" y=\"30\" width=\"24\" height=\"26\" rx=\"6\" fill=\"#F4C0D1\" stroke=\"#72243E\" stroke-width=\"2\"/><circle cx=\"50\" cy=\"20\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M44 56 L26 82\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M56 56 L74 82\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><rect x=\"20\" y=\"60\" width=\"9\" height=\"18\" rx=\"3\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\" opacity=\"0.85\"/><rect x=\"71\" y=\"60\" width=\"9\" height=\"18\" rx=\"3\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\" opacity=\"0.85\"/></svg>", "biceps-curl": "<svg viewBox=\"0 0 100 100\"><rect x=\"6\" y=\"90\" width=\"88\" height=\"5\" rx=\"2.5\" fill=\"#5c5c66\"/><rect x=\"30\" y=\"46\" width=\"18\" height=\"28\" rx=\"6\" fill=\"#F4C0D1\" stroke=\"#72243E\" stroke-width=\"2\"/><circle cx=\"40\" cy=\"34\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M42 46 L60 56\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M60 56 L52 32\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><rect x=\"46\" y=\"18\" width=\"20\" height=\"8\" rx=\"4\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><path d=\"M48 68 L36 88 M48 68 L58 88\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/></svg>", "triceps-pushdown": "<svg viewBox=\"0 0 100 100\"><rect x=\"30\" y=\"10\" width=\"40\" height=\"7\" rx=\"3.5\" fill=\"#5c5c66\"/><rect x=\"46\" y=\"16\" width=\"8\" height=\"20\" rx=\"2\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><circle cx=\"46\" cy=\"26\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M46 34 L46 60\" fill=\"none\" stroke=\"#F4C0D1\" stroke-width=\"16\" stroke-linecap=\"round\"/><path d=\"M46 34 L46 60\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M46 60 L60 66\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M60 66 L60 40\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M46 68 L36 90 M46 68 L56 90\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/></svg>", "calf-press": "<svg viewBox=\"0 0 100 100\"><rect x=\"10\" y=\"12\" width=\"80\" height=\"8\" rx=\"4\" fill=\"#5c5c66\"/><rect x=\"20\" y=\"80\" width=\"10\" height=\"14\" rx=\"2\" fill=\"#8a8a96\" stroke=\"#5c5c66\" stroke-width=\"1.5\"/><rect x=\"18\" y=\"20\" width=\"14\" height=\"60\" rx=\"2\" fill=\"#8fd4bb\" stroke=\"#5c5c66\" stroke-width=\"1.5\" opacity=\"0.5\"/><circle cx=\"46\" cy=\"42\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M46 50 L46 72\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M46 72 L60 92\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M46 72 L34 80 L34 94\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/></svg>", "plank": "<svg viewBox=\"0 0 100 100\"><line x1=\"6\" y1=\"90\" x2=\"94\" y2=\"90\" stroke=\"#8a8a96\" stroke-width=\"4\" stroke-linecap=\"round\" opacity=\"0.5\"/><circle cx=\"18\" cy=\"46\" r=\"8\" fill=\"#f0c9a8\" stroke=\"#72243E\" stroke-width=\"2.5\"/><path d=\"M25 48 L80 62\" fill=\"none\" stroke=\"#F4C0D1\" stroke-width=\"14\" stroke-linecap=\"round\"/><path d=\"M25 48 L80 62\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"5\" stroke-linecap=\"round\"/><path d=\"M25 54 L18 70 L14 86\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M80 62 L90 80\" fill=\"none\" stroke=\"#72243E\" stroke-width=\"6\" stroke-linecap=\"round\"/></svg>"};
-const BASE_PROGRAM = [[{"day": "Lundi — Séance A", "focus": "Pousser + Avant", "cardio": "Cardio : elliptique ou vélo 25 min · zone confortable", "exercises": [{"name": "Leg Press (presse à cuisses)", "muscle": "Quadriceps · Fessiers", "rest": 60, "setsCount": 3, "reps": "12", "weight": "30", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Chest Press (machine convergente)", "muscle": "Pectoraux · Triceps", "rest": 60, "setsCount": 3, "reps": "12", "weight": "12", "bodyweight": false, "isTime": false, "special": false, "icon": "chest-press"}, {"name": "Shoulder Press (développé épaules guidé)", "muscle": "Épaules · Triceps", "rest": 60, "setsCount": 3, "reps": "12", "weight": "8", "bodyweight": false, "isTime": false, "special": false, "icon": "shoulder-press"}, {"name": "Leg Extension", "muscle": "Quadriceps", "rest": 45, "setsCount": 3, "reps": "15", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-extension"}, {"name": "Ab Crunch (machine abdos)", "muscle": "Abdominaux", "rest": 45, "setsCount": 3, "reps": "15", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "ab-crunch"}]}, {"day": "Mercredi — Séance B", "focus": "Tirer + Arrière", "cardio": "Cardio : tapis incliné 25 min · allure vive", "exercises": [{"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Grand dorsal · Biceps", "rest": 60, "setsCount": 3, "reps": "12", "weight": "18", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Leg Curl allongé (ischios)", "muscle": "Ischio-jambiers", "rest": 60, "setsCount": 3, "reps": "12", "weight": "12", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-curl"}, {"name": "Seated Row (tirage horizontal câble)", "muscle": "Dos · Rhomboïdes", "rest": 60, "setsCount": 3, "reps": "12", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "seated-row"}, {"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers · Ischios", "rest": 45, "setsCount": 3, "reps": "15", "weight": "25", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Back Extension (extension dorsale)", "muscle": "Lombaires · Fessiers", "rest": 45, "setsCount": 3, "reps": "12", "weight": "poids du corps", "bodyweight": true, "isTime": false, "special": false, "icon": "back-extension"}]}, {"day": "Vendredi — Séance C", "focus": "Total · Fessiers+", "cardio": "Cardio : elliptique 25 min · résistance modérée", "exercises": [{"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers · Ischios", "rest": 60, "setsCount": 3, "reps": "15", "weight": "25", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Grand dorsal", "rest": 60, "setsCount": 3, "reps": "12", "weight": "18", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Abductor / Adductor (cuisses)", "muscle": "Face externe/interne cuisses", "rest": 45, "setsCount": 3, "reps": "15 chaque", "weight": "20", "bodyweight": false, "isTime": false, "special": false, "icon": "abductor"}, {"name": "Biceps Curl (machine)", "muscle": "Biceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "6", "bodyweight": false, "isTime": false, "special": false, "icon": "biceps-curl"}, {"name": "Gainage planche (sol)", "muscle": "Abdos · Gainage profond", "rest": 20, "setsCount": 3, "reps": "30 s", "weight": null, "bodyweight": false, "isTime": true, "special": false, "icon": "plank"}]}], [{"day": "Lundi — Séance A", "focus": "Pousser + Avant", "cardio": "Cardio : elliptique 27 min · résistance +1 cran", "exercises": [{"name": "Leg Press (presse à cuisses)", "muscle": "Quadriceps · Fessiers", "rest": 45, "setsCount": 3, "reps": "12", "weight": "32", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Chest Press (machine convergente)", "muscle": "Pectoraux · Triceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "13", "bodyweight": false, "isTime": false, "special": false, "icon": "chest-press"}, {"name": "Shoulder Press (développé épaules guidé)", "muscle": "Épaules", "rest": 45, "setsCount": 3, "reps": "12", "weight": "9", "bodyweight": false, "isTime": false, "special": false, "icon": "shoulder-press"}, {"name": "Leg Extension", "muscle": "Quadriceps", "rest": 45, "setsCount": 3, "reps": "15", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-extension"}, {"name": "Triceps Pushdown (poulie haute)", "muscle": "Triceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "8", "bodyweight": false, "isTime": false, "special": false, "icon": "triceps-pushdown"}]}, {"day": "Mercredi — Séance B", "focus": "Tirer + Arrière", "cardio": "Cardio : tapis incliné 27 min · vitesse 5.5–6", "exercises": [{"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Grand dorsal · Biceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "19", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Leg Curl allongé (ischios)", "muscle": "Ischio-jambiers", "rest": 45, "setsCount": 3, "reps": "12", "weight": "13", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-curl"}, {"name": "Seated Row (tirage horizontal câble)", "muscle": "Dos · Rhomboïdes", "rest": 45, "setsCount": 3, "reps": "12", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "seated-row"}, {"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 3, "reps": "15", "weight": "27", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Calf Press (mollets, machine)", "muscle": "Mollets", "rest": 30, "setsCount": 3, "reps": "15", "weight": "25", "bodyweight": false, "isTime": false, "special": false, "icon": "calf-press"}]}, {"day": "Vendredi — Séance C", "focus": "Total · Fessiers+", "cardio": "Cardio : vélo 30 min · résistance moyenne", "exercises": [{"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 3, "reps": "15", "weight": "27", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Dos", "rest": 45, "setsCount": 3, "reps": "12", "weight": "18", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Abductor / Adductor (cuisses)", "muscle": "Cuisses interne/externe", "rest": 45, "setsCount": 3, "reps": "15 chaque", "weight": "20", "bodyweight": false, "isTime": false, "special": false, "icon": "abductor"}, {"name": "Biceps Curl (machine)", "muscle": "Biceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "6", "bodyweight": false, "isTime": false, "special": false, "icon": "biceps-curl"}, {"name": "Gainage planche (sol)", "muscle": "Abdos profonds", "rest": 20, "setsCount": 3, "reps": "40 s", "weight": null, "bodyweight": false, "isTime": true, "special": false, "icon": "plank"}]}], [{"day": "Lundi — Séance A", "focus": "Pousser + Avant", "cardio": "Cardio : elliptique 30 min · intervalles 2 min fort / 1 min calme", "exercises": [{"name": "Leg Press (presse à cuisses)", "muscle": "Quadriceps · Fessiers", "rest": 45, "setsCount": 4, "reps": "10", "weight": "36", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Chest Press (machine convergente)", "muscle": "Pectoraux", "rest": 45, "setsCount": 4, "reps": "10", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "chest-press"}, {"name": "Shoulder Press (développé épaules guidé)", "muscle": "Épaules", "rest": 45, "setsCount": 4, "reps": "10", "weight": "11", "bodyweight": false, "isTime": false, "special": false, "icon": "shoulder-press"}, {"name": "Leg Extension", "muscle": "Quadriceps", "rest": 45, "setsCount": 4, "reps": "12", "weight": "17", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-extension"}, {"name": "Ab Crunch (machine abdos)", "muscle": "Abdominaux", "rest": 30, "setsCount": 4, "reps": "15", "weight": "17", "bodyweight": false, "isTime": false, "special": false, "icon": "ab-crunch"}]}, {"day": "Mercredi — Séance B", "focus": "Tirer + Arrière", "cardio": "Cardio : tapis incliné 30 min · vitesse 6", "exercises": [{"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Grand dorsal", "rest": 45, "setsCount": 4, "reps": "10", "weight": "22", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Leg Curl allongé (ischios)", "muscle": "Ischio-jambiers", "rest": 45, "setsCount": 4, "reps": "10", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-curl"}, {"name": "Seated Row (tirage horizontal câble)", "muscle": "Dos · Rhomboïdes", "rest": 45, "setsCount": 4, "reps": "10", "weight": "18", "bodyweight": false, "isTime": false, "special": false, "icon": "seated-row"}, {"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 4, "reps": "12", "weight": "30", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Back Extension (extension dorsale)", "muscle": "Lombaires", "rest": 45, "setsCount": 3, "reps": "12", "weight": "poids du corps (+ lest léger en option)", "bodyweight": true, "isTime": false, "special": false, "icon": "back-extension"}]}, {"day": "Vendredi — Séance C", "focus": "Total · Fessiers+", "cardio": "Cardio : vélo 33 min · intervalles 1 min fort / 2 min calme", "exercises": [{"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 4, "reps": "12", "weight": "30", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Dos", "rest": 45, "setsCount": 4, "reps": "10", "weight": "22", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Abductor / Adductor (cuisses)", "muscle": "Cuisses", "rest": 30, "setsCount": 4, "reps": "15 chaque", "weight": "23", "bodyweight": false, "isTime": false, "special": false, "icon": "abductor"}, {"name": "Biceps Curl + Triceps Pushdown (circuit)", "muscle": "Bras", "rest": 30, "setsCount": 3, "reps": "12 chaque", "weight": "8", "bodyweight": false, "isTime": false, "special": false, "icon": "biceps-curl"}, {"name": "Gainage planche (sol)", "muscle": "Abdos profonds", "rest": 20, "setsCount": 4, "reps": "40 s", "weight": null, "bodyweight": false, "isTime": true, "special": false, "icon": "plank"}]}], [{"day": "Lundi — Séance A", "focus": "Pousser + Avant", "cardio": "Cardio : elliptique 35 min · résistance haute", "exercises": [{"name": "Leg Press (presse à cuisses)", "muscle": "Quadriceps · Fessiers", "rest": 45, "setsCount": 4, "reps": "10", "weight": "37", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Chest Press (machine convergente)", "muscle": "Pectoraux", "rest": 45, "setsCount": 4, "reps": "10", "weight": "16", "bodyweight": false, "isTime": false, "special": false, "icon": "chest-press"}, {"name": "Shoulder Press (développé épaules guidé)", "muscle": "Épaules", "rest": 45, "setsCount": 4, "reps": "10", "weight": "12", "bodyweight": false, "isTime": false, "special": false, "icon": "shoulder-press"}, {"name": "Leg Extension + Calf Press (mollets)", "muscle": "Quadriceps · Mollets", "rest": 45, "setsCount": 4, "reps": "12 (ext. ~18 kg) + 15 (mollets ~27 kg)", "weight": null, "special": true, "icon": "leg-extension"}, {"name": "Ab Crunch (machine abdos)", "muscle": "Abdominaux", "rest": 30, "setsCount": 4, "reps": "20", "weight": "18", "bodyweight": false, "isTime": false, "special": false, "icon": "ab-crunch"}]}, {"day": "Mercredi — Séance B", "focus": "Tirer + Arrière", "cardio": "Cardio : tapis incliné 35 min · vitesse 6–6.5", "exercises": [{"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Grand dorsal", "rest": 45, "setsCount": 4, "reps": "10", "weight": "23", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Leg Curl allongé (ischios)", "muscle": "Ischio-jambiers", "rest": 45, "setsCount": 4, "reps": "12", "weight": "16", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-curl"}, {"name": "Seated Row (tirage horizontal câble)", "muscle": "Dos", "rest": 45, "setsCount": 4, "reps": "10", "weight": "19", "bodyweight": false, "isTime": false, "special": false, "icon": "seated-row"}, {"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 4, "reps": "15", "weight": "31", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Back Extension (extension dorsale)", "muscle": "Lombaires", "rest": 45, "setsCount": 3, "reps": "15", "weight": "poids du corps (+ lest léger en option)", "bodyweight": true, "isTime": false, "special": false, "icon": "back-extension"}]}, {"day": "Vendredi — Séance C", "focus": "Total · Bilan", "cardio": "Cardio final : 35 min vélo · bilan de tes 4 semaines !", "exercises": [{"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 4, "reps": "15", "weight": "31", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Leg Press (presse à cuisses)", "muscle": "Jambes", "rest": 45, "setsCount": 4, "reps": "10", "weight": "37", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Dos", "rest": 45, "setsCount": 4, "reps": "10", "weight": "23", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Abductor / Adductor (cuisses)", "muscle": "Cuisses", "rest": 30, "setsCount": 4, "reps": "15", "weight": "24", "bodyweight": false, "isTime": false, "special": false, "icon": "abductor"}, {"name": "Gainage planche (sol)", "muscle": "Abdos profonds", "rest": 20, "setsCount": 4, "reps": "50 s", "weight": null, "bodyweight": false, "isTime": true, "special": false, "icon": "plank"}]}]];
+const BASE_PROGRAM = [[{"day": "Lundi — Séance A", "focus": "Pousser + Avant", "cardio": "Cardio : elliptique ou vélo 25 min · zone confortable", "exercises": [{"name": "Leg Press (presse à cuisses)", "muscle": "Quadriceps · Fessiers", "rest": 60, "setsCount": 3, "reps": "12", "weight": "30", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Chest Press (machine convergente)", "muscle": "Pectoraux · Triceps", "rest": 60, "setsCount": 3, "reps": "12", "weight": "12", "bodyweight": false, "isTime": false, "special": false, "icon": "chest-press"}, {"name": "Shoulder Press (développé épaules guidé)", "muscle": "Épaules · Triceps", "rest": 60, "setsCount": 3, "reps": "12", "weight": "8", "bodyweight": false, "isTime": false, "special": false, "icon": "shoulder-press"}, {"name": "Leg Extension", "muscle": "Quadriceps", "rest": 45, "setsCount": 3, "reps": "15", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-extension"}, {"name": "Ab Crunch (machine abdos)", "muscle": "Abdominaux", "rest": 45, "setsCount": 3, "reps": "15", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "ab-crunch"}]}, {"day": "Mercredi — Séance B", "focus": "Tirer + Arrière", "cardio": "Cardio : tapis incliné 25 min · allure vive", "exercises": [{"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Grand dorsal · Biceps", "rest": 60, "setsCount": 3, "reps": "12", "weight": "18", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Leg Curl allongé (ischios)", "muscle": "Ischio-jambiers", "rest": 60, "setsCount": 3, "reps": "12", "weight": "12", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-curl"}, {"name": "Seated Row (tirage horizontal câble)", "muscle": "Dos · Rhomboïdes", "rest": 60, "setsCount": 3, "reps": "12", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "seated-row"}, {"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers · Ischios", "rest": 45, "setsCount": 3, "reps": "15", "weight": "25", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Back Extension (extension dorsale)", "muscle": "Lombaires · Fessiers", "rest": 45, "setsCount": 3, "reps": "12", "weight": "poids du corps", "bodyweight": true, "isTime": false, "special": false, "icon": "back-extension"}]}, {"day": "Vendredi — Séance C", "focus": "Total · Fessiers+", "cardio": "Cardio : elliptique 25 min · résistance modérée", "exercises": [{"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers · Ischios", "rest": 60, "setsCount": 3, "reps": "15", "weight": "25", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Grand dorsal", "rest": 60, "setsCount": 3, "reps": "12", "weight": "18", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Abductor / Adductor (cuisses)", "muscle": "Face externe/interne cuisses", "rest": 45, "setsCount": 3, "reps": "15 chaque", "weight": "20", "bodyweight": false, "isTime": false, "special": false, "icon": "abductor"}, {"name": "Biceps Curl (machine)", "muscle": "Biceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "6", "bodyweight": false, "isTime": false, "special": false, "icon": "biceps-curl"}, {"name": "Gainage planche (sol)", "muscle": "Abdos · Gainage profond", "rest": 20, "setsCount": 3, "reps": "30 s", "weight": null, "bodyweight": false, "isTime": true, "special": false, "icon": "plank"}]}], [{"day": "Lundi — Séance A", "focus": "Pousser + Avant", "cardio": "Cardio : elliptique 27 min · résistance +1 cran", "exercises": [{"name": "Leg Press (presse à cuisses)", "muscle": "Quadriceps · Fessiers", "rest": 45, "setsCount": 3, "reps": "12", "weight": "32", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Chest Press (machine convergente)", "muscle": "Pectoraux · Triceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "13", "bodyweight": false, "isTime": false, "special": false, "icon": "chest-press"}, {"name": "Shoulder Press (développé épaules guidé)", "muscle": "Épaules", "rest": 45, "setsCount": 3, "reps": "12", "weight": "9", "bodyweight": false, "isTime": false, "special": false, "icon": "shoulder-press"}, {"name": "Leg Extension", "muscle": "Quadriceps", "rest": 45, "setsCount": 3, "reps": "15", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-extension"}, {"name": "Triceps Pushdown (poulie haute)", "muscle": "Triceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "8", "bodyweight": false, "isTime": false, "special": false, "icon": "triceps-pushdown"}]}, {"day": "Mercredi — Séance B", "focus": "Tirer + Arrière", "cardio": "Cardio : tapis incliné 27 min · vitesse 5.5–6", "exercises": [{"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Grand dorsal · Biceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "19", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Leg Curl allongé (ischios)", "muscle": "Ischio-jambiers", "rest": 45, "setsCount": 3, "reps": "12", "weight": "13", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-curl"}, {"name": "Seated Row (tirage horizontal câble)", "muscle": "Dos · Rhomboïdes", "rest": 45, "setsCount": 3, "reps": "12", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "seated-row"}, {"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 3, "reps": "15", "weight": "27", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Calf Press (mollets, machine)", "muscle": "Mollets", "rest": 30, "setsCount": 3, "reps": "15", "weight": "25", "bodyweight": false, "isTime": false, "special": false, "icon": "calf-press"}]}, {"day": "Vendredi — Séance C", "focus": "Total · Fessiers+", "cardio": "Cardio : vélo 30 min · résistance moyenne", "exercises": [{"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 3, "reps": "15", "weight": "27", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Dos", "rest": 45, "setsCount": 3, "reps": "12", "weight": "18", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Abductor / Adductor (cuisses)", "muscle": "Cuisses interne/externe", "rest": 45, "setsCount": 3, "reps": "15 chaque", "weight": "20", "bodyweight": false, "isTime": false, "special": false, "icon": "abductor"}, {"name": "Biceps Curl (machine)", "muscle": "Biceps", "rest": 45, "setsCount": 3, "reps": "12", "weight": "6", "bodyweight": false, "isTime": false, "special": false, "icon": "biceps-curl"}, {"name": "Gainage planche (sol)", "muscle": "Abdos profonds", "rest": 20, "setsCount": 3, "reps": "40 s", "weight": null, "bodyweight": false, "isTime": true, "special": false, "icon": "plank"}]}], [{"day": "Lundi — Séance A", "focus": "Pousser + Avant", "cardio": "Cardio : elliptique 30 min · intervalles 2 min fort / 1 min calme", "exercises": [{"name": "Leg Press (presse à cuisses)", "muscle": "Quadriceps · Fessiers", "rest": 45, "setsCount": 4, "reps": "10", "weight": "36", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Chest Press (machine convergente)", "muscle": "Pectoraux", "rest": 45, "setsCount": 4, "reps": "10", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "chest-press"}, {"name": "Shoulder Press (développé épaules guidé)", "muscle": "Épaules", "rest": 45, "setsCount": 4, "reps": "10", "weight": "11", "bodyweight": false, "isTime": false, "special": false, "icon": "shoulder-press"}, {"name": "Leg Extension", "muscle": "Quadriceps", "rest": 45, "setsCount": 4, "reps": "12", "weight": "17", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-extension"}, {"name": "Ab Crunch (machine abdos)", "muscle": "Abdominaux", "rest": 30, "setsCount": 4, "reps": "15", "weight": "17", "bodyweight": false, "isTime": false, "special": false, "icon": "ab-crunch"}]}, {"day": "Mercredi — Séance B", "focus": "Tirer + Arrière", "cardio": "Cardio : tapis incliné 30 min · vitesse 6", "exercises": [{"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Grand dorsal", "rest": 45, "setsCount": 4, "reps": "10", "weight": "22", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Leg Curl allongé (ischios)", "muscle": "Ischio-jambiers", "rest": 45, "setsCount": 4, "reps": "10", "weight": "15", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-curl"}, {"name": "Seated Row (tirage horizontal câble)", "muscle": "Dos · Rhomboïdes", "rest": 45, "setsCount": 4, "reps": "10", "weight": "18", "bodyweight": false, "isTime": false, "special": false, "icon": "seated-row"}, {"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 4, "reps": "12", "weight": "30", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Back Extension (extension dorsale)", "muscle": "Lombaires", "rest": 45, "setsCount": 3, "reps": "12", "weight": "poids du corps (+ lest léger en option)", "bodyweight": true, "isTime": false, "special": false, "icon": "back-extension"}]}, {"day": "Vendredi — Séance C", "focus": "Total · Fessiers+", "cardio": "Cardio : vélo 33 min · intervalles 1 min fort / 2 min calme", "exercises": [{"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 4, "reps": "12", "weight": "30", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Dos", "rest": 45, "setsCount": 4, "reps": "10", "weight": "22", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Abductor / Adductor (cuisses)", "muscle": "Cuisses", "rest": 30, "setsCount": 4, "reps": "15 chaque", "weight": "23", "bodyweight": false, "isTime": false, "special": false, "icon": "abductor"}, {"name": "Biceps Curl + Triceps Pushdown (circuit)", "muscle": "Bras", "rest": 30, "setsCount": 3, "reps": "12 chaque", "weight": "8", "bodyweight": false, "isTime": false, "special": false, "icon": "biceps-curl"}, {"name": "Gainage planche (sol)", "muscle": "Abdos profonds", "rest": 20, "setsCount": 4, "reps": "40 s", "weight": null, "bodyweight": false, "isTime": true, "special": false, "icon": "plank"}]}], [{"day": "Lundi — Séance A", "focus": "Pousser + Avant", "cardio": "Cardio : elliptique 35 min · résistance haute", "exercises": [{"name": "Leg Press (presse à cuisses)", "muscle": "Quadriceps · Fessiers", "rest": 45, "setsCount": 4, "reps": "10", "weight": "37", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Chest Press (machine convergente)", "muscle": "Pectoraux", "rest": 45, "setsCount": 4, "reps": "10", "weight": "16", "bodyweight": false, "isTime": false, "special": false, "icon": "chest-press"}, {"name": "Shoulder Press (développé épaules guidé)", "muscle": "Épaules", "rest": 45, "setsCount": 4, "reps": "10", "weight": "12", "bodyweight": false, "isTime": false, "special": false, "icon": "shoulder-press"}, {"name": "Leg Extension", "muscle": "Quadriceps", "rest": 45, "setsCount": 4, "reps": "12", "weight": "18", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-extension"}, {"name": "Calf Press (mollets, machine)", "muscle": "Mollets", "rest": 30, "setsCount": 4, "reps": "15", "weight": "27", "bodyweight": false, "isTime": false, "special": false, "icon": "calf-press"}, {"name": "Ab Crunch (machine abdos)", "muscle": "Abdominaux", "rest": 30, "setsCount": 4, "reps": "20", "weight": "18", "bodyweight": false, "isTime": false, "special": false, "icon": "ab-crunch"}]}, {"day": "Mercredi — Séance B", "focus": "Tirer + Arrière", "cardio": "Cardio : tapis incliné 35 min · vitesse 6–6.5", "exercises": [{"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Grand dorsal", "rest": 45, "setsCount": 4, "reps": "10", "weight": "23", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Leg Curl allongé (ischios)", "muscle": "Ischio-jambiers", "rest": 45, "setsCount": 4, "reps": "12", "weight": "16", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-curl"}, {"name": "Seated Row (tirage horizontal câble)", "muscle": "Dos", "rest": 45, "setsCount": 4, "reps": "10", "weight": "19", "bodyweight": false, "isTime": false, "special": false, "icon": "seated-row"}, {"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 4, "reps": "15", "weight": "31", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Back Extension (extension dorsale)", "muscle": "Lombaires", "rest": 45, "setsCount": 3, "reps": "15", "weight": "poids du corps (+ lest léger en option)", "bodyweight": true, "isTime": false, "special": false, "icon": "back-extension"}]}, {"day": "Vendredi — Séance C", "focus": "Total · Bilan", "cardio": "Cardio final : 35 min vélo · bilan de tes 4 semaines !", "exercises": [{"name": "Leg Press — pieds hauts (fessiers)", "muscle": "Fessiers", "rest": 45, "setsCount": 4, "reps": "15", "weight": "31", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Leg Press (presse à cuisses)", "muscle": "Jambes", "rest": 45, "setsCount": 4, "reps": "10", "weight": "37", "bodyweight": false, "isTime": false, "special": false, "icon": "leg-press"}, {"name": "Lat Pulldown (tirage poulie haute)", "muscle": "Dos", "rest": 45, "setsCount": 4, "reps": "10", "weight": "23", "bodyweight": false, "isTime": false, "special": false, "icon": "lat-pulldown"}, {"name": "Abductor / Adductor (cuisses)", "muscle": "Cuisses", "rest": 30, "setsCount": 4, "reps": "15", "weight": "24", "bodyweight": false, "isTime": false, "special": false, "icon": "abductor"}, {"name": "Gainage planche (sol)", "muscle": "Abdos profonds", "rest": 20, "setsCount": 4, "reps": "50 s", "weight": null, "bodyweight": false, "isTime": true, "special": false, "icon": "plank"}]}]];
 // ─── PLAN SUR 1 AN : 13 cycles de 4 semaines ───────────────────────────────
-// Cycle 1 = programme d'origine. Ensuite : charges +5 %/cycle (plafond +50 %),
-// cardio +1 min/cycle (plafond 45 min), gainage +5 s/cycle (plafond 90 s).
+// Cycle 1 (semaines 1-4) = programme d'origine. Ensuite : les charges montent un
+// peu CHAQUE semaine, sans jamais redescendre, à partir du plus haut poids atteint
+// par chaque exercice en semaines 1-4 (jusqu'à +50 % à la semaine 52).
+// Cardio +1 min/cycle (plafond 45 min), gainage +5 s/cycle (plafond 90 s).
 const TOTAL_CYCLES = 13;
+const WEEKLY_GAIN = 0.5 / (TOTAL_CYCLES * 4 - 4);  // +50 % réparti sur les semaines 5 → 52
 const PHASES = ['Fondations', 'Progression', 'Intensification', 'Consolidation'];
 function scaleKg(v, f) {
   const x = parseFloat(v) * f;
@@ -739,10 +833,18 @@ function scaleKg(v, f) {
   return String(Math.round(x / step) * step);
 }
 function buildProgram() {
+  // Plus haut poids de chaque exercice sur le cycle d'origine = point de départ de la progression
+  const peak = {};
+  BASE_PROGRAM.forEach(week => week.forEach(day => day.exercises.forEach(ex => {
+    if (ex.weight && /^\d+(\.\d+)?$/.test(String(ex.weight))) {
+      peak[ex.name] = Math.max(peak[ex.name] || 0, parseFloat(ex.weight));
+    }
+  })));
   const out = [];
   for (let c = 0; c < TOTAL_CYCLES; c++) {
-    const f = Math.min(1.5, 1 + 0.05 * c);
     BASE_PROGRAM.forEach((week, w) => {
+      const gw = c * BASE_PROGRAM.length + w + 1;               // numéro de semaine global (1-52)
+      const f = gw <= BASE_PROGRAM.length ? 1 : 1 + WEEKLY_GAIN * (gw - BASE_PROGRAM.length);
       const last = c === TOTAL_CYCLES - 1 && w === BASE_PROGRAM.length - 1;
       out.push(week.map(day => {
         const nd = JSON.parse(JSON.stringify(day));
@@ -751,8 +853,9 @@ function buildProgram() {
           nd.cardio = nd.cardio.replace('bilan de tes 4 semaines', last ? 'bilan de ton année' : 'bilan du cycle');
         }
         nd.exercises.forEach(ex => {
-          if (ex.weight && /^\d+(\.\d+)?$/.test(String(ex.weight))) ex.weight = scaleKg(ex.weight, f);
-          if (ex.special && ex.reps) ex.reps = ex.reps.replace(/(\d+(?:\.\d+)?)(\s*kg)/g, (m, n, u) => scaleKg(n, f) + u);
+          if (gw > BASE_PROGRAM.length && peak[ex.name] && ex.weight && /^\d+(\.\d+)?$/.test(String(ex.weight))) {
+            ex.weight = scaleKg(peak[ex.name], f);
+          }
           if (ex.isTime && ex.reps) ex.reps = ex.reps.replace(/(\d+)(\s*s)/, (m, n, u) => Math.min(+n + 5 * c, Math.max(90, +n)) + u);
         });
         return nd;
@@ -764,7 +867,48 @@ function buildProgram() {
 const PROGRAM = buildProgram();
 const NUM_WEEKS = PROGRAM.length;
 const WEEK_KEY = 'fb_current_week';
-let currentWeek = Math.min(NUM_WEEKS, Math.max(1, parseInt(localStorage.getItem(WEEK_KEY) || '1', 10)));
+const START_KEY = 'fb_start_monday';   // lundi de la semaine 1 (AAAA-MM-JJ)
+
+// ─── SEMAINE AUTOMATIQUE (calculée depuis la date) ──────────────────────────
+function mondayOf(date) {
+  const x = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+  return x;
+}
+function addDays(date, n) {
+  const x = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  x.setDate(x.getDate() + n);
+  return x;
+}
+function dayIndex(date) {   // n° de jour calendaire, insensible au changement d'heure
+  return Math.round(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000);
+}
+function fmtDate(date) {
+  return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+}
+function getStart() {
+  try {
+    const m = (localStorage.getItem(START_KEY) || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  } catch (e) { return null; }
+}
+function setStart(date) { try { localStorage.setItem(START_KEY, fmtDate(date)); } catch (e) {} }
+function clampWeek(n) { return Math.min(NUM_WEEKS, Math.max(1, parseInt(n, 10) || 1)); }
+function calendarWeek() {
+  const start = getStart();
+  if (!start) return 1;
+  return clampWeek(Math.floor((dayIndex(mondayOf(new Date())) - dayIndex(start)) / 7) + 1);
+}
+function initialWeek() {
+  if (!getStart()) {
+    // Première ouverture avec cette version : on conserve la semaine déjà en cours (rien ne change)
+    let stored = 1;
+    try { stored = parseInt(localStorage.getItem(WEEK_KEY) || '1', 10); } catch (e) {}
+    setStart(addDays(mondayOf(new Date()), -7 * (clampWeek(stored) - 1)));
+  }
+  return calendarWeek();
+}
+let currentWeek = initialWeek();
 
 const STORAGE_KEY = 'fb_perte_poids_v1';
 function loadState() {
@@ -839,19 +983,10 @@ function buildExList(d) {
     const card = document.createElement('div');
     card.className = 'app-ec';
 
-    if (ex.special) {
-      card.innerHTML =
-        `<div class="app-ec-top">${thumbHtml(ex)}<div><div class="app-en">${ex.name}</div><div class="app-em">${ex.muscle}</div></div></div>` +
-        `<div class="app-etarget">${ex.setsCount} séries · ${ex.reps}</div>` +
-        `<div class="app-note">Exercice combiné — pas de suivi série par série, ajuste au ressenti.</div>`;
-      list.appendChild(card);
-      return;
-    }
-
     const weightLabel = ex.bodyweight ? 'poids du corps' : (ex.weight ? '~' + ex.weight + ' kg' : '');
     card.innerHTML =
       `<div class="app-ec-top">${thumbHtml(ex)}<div><div class="app-en">${ex.name}</div><div class="app-em">${ex.muscle}</div></div></div>` +
-      `<div class="app-etarget">${ex.setsCount} × ${ex.reps}${weightLabel ? ' · ' + weightLabel : ''} · repos ${ex.rest}s</div>`;
+      `<div class="app-etarget">${ex.setsCount} × ${ex.reps}${weightLabel ? ' · ' + weightLabel : ''} · repos ${restFor(ex)}s</div>`;
 
     const tracker = document.createElement('div');
     tracker.className = 'set-tracker';
@@ -891,7 +1026,7 @@ function buildExList(d) {
         box.classList.toggle('done', st[key].done);
         updateDayStats(d);
         showSaved(d);
-        if (st[key].done) startRest(ex.rest, ex.name);
+        if (st[key].done) startRest(restFor(ex), ex.name);
       });
       tracker.appendChild(box);
     }
@@ -954,7 +1089,6 @@ function updateDayStats(d) {
   const state = loadState();
   let total = 0, done = 0;
   day.exercises.forEach((ex, ei) => {
-    if (ex.special) return;
     for (let s = 0; s < ex.setsCount; s++) {
       total++;
       const key = `w${currentWeek}_d${d}_e${ei}_s${s}`;
@@ -997,7 +1131,6 @@ function resetDay(d) {
   const day = currentDay(d);
   const state = loadState();
   day.exercises.forEach((ex, ei) => {
-    if (ex.special) return;
     for (let s = 0; s < ex.setsCount; s++) delete state[`w${currentWeek}_d${d}_e${ei}_s${s}`];
   });
   delete state[cardioKey(d)];
@@ -1013,6 +1146,15 @@ function gotoWeek(n) {
   buildRecap();
 }
 function changeWeek(delta) { gotoWeek(currentWeek + delta); }
+function backToCalendarWeek() { gotoWeek(calendarWeek()); }
+function setViewedAsCurrentWeek() {   // recale le calendrier : "la semaine affichée = cette semaine"
+  setStart(addDays(mondayOf(new Date()), -7 * (currentWeek - 1)));
+  buildRecap();
+}
+function todayPage() {   // lun → A · mar, mer → B · jeu, ven → C · week-end → Récap
+  const p = { 1: 0, 2: 1, 3: 1, 4: 2, 5: 2 }[new Date().getDay()];
+  return p === undefined ? 3 : p;
+}
 
 function buildRecapCards() {
   const c = document.getElementById('recapCards');
@@ -1023,7 +1165,6 @@ function buildRecapCards() {
     const day = currentDay(d);
     let total = 0, done = 0;
     day.exercises.forEach((ex, ei) => {
-      if (ex.special) return;
       for (let s = 0; s < ex.setsCount; s++) {
         total++;
         const key = `w${currentWeek}_d${d}_e${ei}_s${s}`;
@@ -1042,7 +1183,7 @@ function buildRecapCards() {
       `<div class="app-rdp"><div class="app-rdpf" style="width:${pct}%"></div></div>`;
     c.appendChild(card);
   });
-  const totalSeries = [0, 1, 2].reduce((a, d) => a + currentDay(d).exercises.reduce((b, ex) => b + (ex.special ? 0 : ex.setsCount), 0), 0);
+  const totalSeries = [0, 1, 2].reduce((a, d) => a + currentDay(d).exercises.reduce((b, ex) => b + ex.setsCount, 0), 0);
   const ts = document.getElementById('totalSeries');
   if (ts) ts.textContent = totalSeries;
   const tc = document.getElementById('totalCardio');
@@ -1059,7 +1200,6 @@ function buildVolume() {
   list.innerHTML = '';
   const vm = {};
   [0, 1, 2].forEach(d => currentDay(d).exercises.forEach(ex => {
-    if (ex.special) return;
     ex.muscle.split(' · ').forEach(m => { vm[m] = (vm[m] || 0) + ex.setsCount; });
   }));
   const maxV = Math.max(...Object.values(vm), 1);
@@ -1094,12 +1234,41 @@ function buildRecap() {
     }
     sel.value = String(currentWeek);
   }
+  const wn = document.getElementById('wkNotice');
+  if (wn) {
+    const cal = calendarWeek();
+    if (currentWeek === cal) {
+      wn.style.display = 'none';
+      wn.innerHTML = '';
+    } else {
+      wn.style.display = 'block';
+      wn.innerHTML =
+        `<div>Tu consultes la semaine ${currentWeek} · semaine en cours : <b>S${cal}</b></div>` +
+        `<div class="wk-notice-btns">` +
+        `<button class="rest-btn" onclick="backToCalendarWeek()">↺ Revenir à S${cal}</button>` +
+        `<button class="rest-btn" onclick="setViewedAsCurrentWeek()">📌 S${currentWeek} = cette semaine</button>` +
+        `</div>`;
+    }
+  }
   buildRecapCards();
   buildVolume();
 }
 
 [0, 1, 2].forEach(refreshDay);
 buildRecap();
+renderRestChoice();
+goToPage(todayPage());   // ouvre directement la séance du jour
+
+// Appli restée ouverte en arrière-plan : au 1er retour d'un nouveau jour, on recale semaine + séance
+let lastSeenDay = fmtDate(new Date());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  const today = fmtDate(new Date());
+  if (today === lastSeenDay) return;   // même jour : on ne dérange pas la séance en cours
+  lastSeenDay = today;
+  gotoWeek(calendarWeek());
+  goToPage(todayPage());
+});
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

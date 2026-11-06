@@ -1,4 +1,4 @@
-const CACHE_NAME = 'perte-de-poids-v6';
+const CACHE_NAME = 'perte-de-poids-v9';
 const ASSETS = [
   './index.html',
   './manifest.json',
